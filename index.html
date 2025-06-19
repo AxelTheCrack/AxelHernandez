@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"> <!-- Esto asegura que las tildes y la Ñ se vean bien -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Sitio Académico Personal - Axel</title>
+    <!-- Carga de Tailwind CSS para el diseño -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de React y ReactDOM para la funcionalidad interactiva -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Carga de Babel para que el navegador entienda el código moderno de React (JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* Define la fuente Inter para todo el texto */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0; /* Elimina márgenes por defecto */
+            padding: 0; /* Elimina rellenos por defecto */
+        }
+
+        /* Animación para la superposición de la imagen del hacker */
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .hacker-image-animation {
+            animation: fadeInScale 0.6s ease-out forwards;
+        }
+
+        /* Animación para cuando cambias de sección (contenido aparece suavemente) */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.5s ease-out forwards;
+        }
+
+        /* Animación para el modal de video */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-animate-in {
+            animation: modalFadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col font-inter relative">
+    <!-- Este es el lugar donde React construirá tu sitio web -->
+    <div id="root" class="flex flex-col flex-grow">
+    </div>
+
+    <!-- TODO el código de tu aplicación React va aquí, dentro de este script -->
+    <script type="text/babel">
+        // Importa las funciones necesarias de React
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // --- Definición de Componentes de Iconos (anteriormente de Lucide React) ---
+        // Estos SVGs son equivalentes a los iconos de Lucide React que se usaban.
+        // Se definen como componentes de React para ser usados directamente en el JSX.
+        const Home = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>;
+        const Globe = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20A14.5 14.5 0 0 0 12 2"/><path d="M2 12h20"/></svg>;
+        const User = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+        const Lightbulb = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 6c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M11 17v5"/><path d="M12 17v5"/></svg>;
+        const HeartHandshake = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.04 3 5.5L12 22z"/><path d="m17.5 11.5-1.5 1.5c-2.83 2.83-4.24 4.24-5.5 5.5l-1.5 1.5"/></svg>;
+        const Award = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 22 12 17 17 22 15.79 13.89"/></svg>;
+        const Trophy = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 11V7h4v4"/><path d="M12 17v5"/><path d="M12 17H8c-1.33 0-2 1-2-2.5V11.5c0-1.5.67-2.5 2-2.5h8c1.33 0 2 1 2 2.5v3c0 1.5-.67 2.5-2 2.5H12Z"/></svg>;
+        const GraduationCap = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21.42 10.98v-3.7L12 2 2.58 7.28v3.7"/><path d="M14.5 17h-5M12 21V7"/><path d="M12 13h9a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h9.5Z"/></svg>;
+        const Shield = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M20 13c0 5-4 9-8 11s-8-6-8-11V5l8-3 8 3z"/></svg>;
+        const Ribbon = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5.5 17.5 3 22l2.5-2.5L8 22z"/><path d="M12 18V2l7 4-7 4"/><path d="M12 18V2l-7 4 7 4"/></svg>;
+        const Star = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
+        const Phone = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-3.67-3.67A19.79 19.79 0 0 1 2 4.18 2 2 0 0 1 4.18 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 makes 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
+        const Mail = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
+        const Instagram = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.5" y1="6.5" y2="6.5"/></svg>;
+        const Link = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07L10 6.54ZM14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07L14 17.46Z"/></svg>;
+        const BookText = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h6"/></svg>;
+        const MapPin = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 12a10 10 0 0 0 0 20A10 10 0 0 0 12 12"/><path d="M12 2a10 10 0 0 0-10 10c0 5.5 4 10 10 10s10-4.5 10-10A10 10 0 0 0 12 2Z"/><path d="M12 12l-6 6"/><path d="M12 12l6 6"/></svg>;
+        const Image = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>;
+        // Icono para videos, similar al de PlayCircle que se usaría en React con Lucide
+        const VideoPlay = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>;
+        // Icono para Noticias (Newspaper)
+        const Newspaper = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8.5c-.6 0-1.1.2-1.5.6L3.7 7.5c-.4.4-.6.9-.6 1.5v11c0 1.1.9 2 2 2z"/><path d="M8 6h8"/><path d="M8 10h8"/><path d="M8 14h8"/></svg>;
+
+
+        // Componente principal de tu aplicación (todo tu sitio web está aquí)
+        function App() {
+          // Estado para saber qué parte del sitio se está mostrando (Inicio, Olimpiadas, etc.)
+          const [currentView, setCurrentView] = useState('inicio');
+          // Estado para controlar la animación de la imagen del hacker al cambiar de sección
+          const [showHackerAnimation, setShowHackerAnimation] = useState(false);
+          // Estado para controlar la visibilidad del modal de video de introducción
+          const [showIntroVideoModal, setShowIntroVideoModal] = useState(true);
+
+          // Función para copiar texto al portapapeles (para número de teléfono, email)
+          const handleCopyToClipboard = (text, messageElementId) => {
+              const el = document.createElement('textarea');
+              el.value = text;
+              el.style.position = 'absolute';
+              el.style.left = '-9999px'; // Lo hace invisible fuera de la pantalla
+              document.body.appendChild(el);
+              el.select();
+              document.execCommand('copy'); // Copia el texto seleccionado
+              document.body.removeChild(el);
+
+              // Muestra un mensaje temporal de "¡Copiado!"
+              const messageElement = document.getElementById(messageElementId);
+              if (messageElement) {
+                  messageElement.textContent = '¡Copiado!';
+                  messageElement.classList.remove('opacity-0'); // Hace visible el mensaje
+                  messageElement.classList.add('opacity-100');
+                  setTimeout(() => {
+                      messageElement.classList.remove('opacity-100'); // Lo desvanece
+                      messageElement.classList.add('opacity-0');
+                      messageElement.textContent = ''; // Borra el texto
+                  }, 2000); // Se oculta después de 2 segundos
+              }
+          };
+
+          // Función para cambiar de sección con la animación de transición
+          const changeViewWithAnimation = (view) => {
+            setShowHackerAnimation(true); // Activa la animación del hacker
+            setTimeout(() => {
+              setCurrentView(view); // Cambia la sección después de que la animación tenga tiempo de verse
+              setShowHackerAnimation(false); // Desactiva la animación del hacker
+            }, 800); // Duración de la animación en milisegundos
+          };
+
+          // Componente para el fondo animado de "lluvia de matemáticas"
+          const MathAnimatedBackground = () => {
+            const canvasRef = useRef(null); // Referencia al elemento <canvas>
+            const animationFrameId = useRef(null); // Para controlar la animación (detenerla/reiniciarla)
+            const drops = useRef([]); // Almacena la posición de cada "gota" de carácter
+            // Caracteres que caerán en la lluvia (números, operadores, letras griegas, etc.)
+            const characters = '0123456789+-*=÷∫∑√πθφΔΩαβγδεζηικλμνξοπρστυφχψω';
+            const fontSize = 16; // Tamaño de la fuente de los caracteres
+            let columns = 0; // Número de columnas de caracteres
+
+            // Ajusta el tamaño del canvas para que ocupe toda la pantalla y el contenido
+            const updateCanvasSize = useCallback(() => {
+              const canvas = canvasRef.current;
+              if (!canvas) return;
+
+              const width = window.innerWidth; // Ancho de la ventana
+              // Altura que cubre todo el contenido desplazable (incluyendo pies de página largos, etc.)
+              const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, window.innerHeight);
+
+              // Solo actualiza si hay un cambio significativo para evitar redibujados innecesarios
+              if (canvas.width !== width || canvas.height !== height) {
+                canvas.width = width;
+                canvas.height = height;
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
+
+                columns = Math.floor(width / fontSize); // Calcula cuántas columnas caben
+                // Reinicia las gotas si el número de columnas cambia (para evitar problemas visuales)
+                if (drops.current.length !== columns) {
+                    drops.current = Array(columns).fill(0); // Inicia todas las gotas en la parte superior
+                }
+              }
+            }, []);
+
+            // Función principal de dibujo para la animación de la lluvia
+            const draw = useCallback(() => {
+              const canvas = canvasRef.current;
+              if (!canvas) return;
+              const ctx = canvas.getContext('2d'); // Contexto de dibujo 2D del canvas
+
+              // Dibuja un rectángulo semi-transparente para crear el efecto de "arrastre" de los caracteres
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+              ctx.fillStyle = '#e0b100'; // Color dorado para los caracteres
+              ctx.font = `${fontSize}px monospace`; // Estilo de la fuente
+
+              // Dibuja cada "gota" de la lluvia
+              for (let i = 0; i < drops.current.length; i++) {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length)); // Elige un carácter aleatorio
+                ctx.fillText(text, i * fontSize, drops.current[i] * fontSize); // Dibuja el carácter en su posición
+
+                // Si la "gota" llega al final de la pantalla, la devuelve al principio (con un poco de aleatoriedad)
+                if (drops.current[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                  drops.current[i] = 0; // Vuelve al inicio de la columna
+                }
+
+                drops.current[i]++; // Mueve la "gota" hacia abajo
+              }
+              animationFrameId.current = requestAnimationFrame(draw); // Solicita el próximo frame de animación
+            }, []);
+
+            // Efecto que se ejecuta al montar el componente y cuando la ventana cambia de tamaño
+            useEffect(() => {
+              updateCanvasSize(); // Configura el tamaño inicial
+              const handleResize = () => updateCanvasSize(); // Función para actualizar al redimensionar
+              window.addEventListener('resize', handleResize); // Añade el "escuchador" de eventos
+
+              draw(); // Inicia el bucle de la animación
+
+              // Función de limpieza: se ejecuta cuando el componente se quita de la pantalla
+              return () => {
+                if (animationFrameId.current) {
+                  cancelAnimationFrame(animationFrameId.current); // Detiene la animación
+                }
+                window.removeEventListener('resize', handleResize); // Elimina el escuchador de eventos
+              };
+            }, [draw, updateCanvasSize]); // Dependencias para que los callbacks se actualicen si cambian
+
+            return (
+              <canvas
+                ref={canvasRef}
+                className="absolute top-0 left-0 z-0"
+                style={{ pointerEvents: 'none' }} /* Para que el mouse no interactúe con el canvas */
+              ></canvas>
+            );
+          };
+
+          // Componente para la barra de navegación superior
+          const Navbar = () => {
+            return (
+              <nav className="relative bg-gray-900 p-4 shadow-lg rounded-b-xl z-10">
+                <div className="container mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                  {/* Logo de Axel */}
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src="https://i.ibb.co/SXsq7Ncx/Gemini-Generated-Image-gth6argth6argth6.png" // URL de tu logo
+                      alt="Logo de Axel"
+                      className="rounded-full border-2 border-yellow-500 w-12 h-12 object-cover"
+                    />
+                    <a href="#" className="text-yellow-400 text-3xl font-extrabold tracking-tight hover:text-yellow-200 transition-colors duration-300">
+                      Mi Espacio Académico
+                    </a>
+                  </div>
+                  {/* Botones de navegación */}
+                  <div className="flex flex-wrap justify-center md:justify-end space-x-2 sm:space-x-4">
+                    <NavItem icon={<Home className="w-5 h-5" />} text="Inicio" view="inicio" />
+                    <NavItem icon={<Globe className="w-5 h-5" />} text="Olimpiadas" view="olimpiadas" />
+                    <NavItem icon={<Ribbon className="w-5 h-5" />} text="Reconocimientos" view="reconocimientos" />
+                    <NavItem icon={<User className="w-5 h-5" />} text="Sobre Mí" view="sobreMi" />
+                    <NavItem icon={<Lightbulb className="w-5 h-5" />} text="Proyectos Futuros" view="proyectosFuturos" />
+                    <NavItem icon={<GraduationCap className="w-5 h-5" />} text="Axel en Escuelas" view="axelEnEscuelas" />
+                    <NavItem icon={<Image className="w-5 h-5" />} text="Galería" view="galeria" />
+                    <NavItem icon={<Newspaper className="w-5 h-5" />} text="Noticias" view="noticias" /> {/* Nueva entrada para Noticias */}
+                  </div>
+                </div>
+              </nav>
+            );
+          };
+
+          // Componente para cada botón de navegación
+          const NavItem = ({ icon, text, view }) => (
+            <button
+              onClick={() => changeViewWithAnimation(view)}
+              className="flex items-center space-x-2 text-gray-200 px-4 py-2 rounded-full text-lg font-medium hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transform hover:scale-105"
+            >
+              {icon}
+              <span>{text}</span>
+            </button>
+          );
+
+          // Contenido de la sección de Inicio
+          const InicioContent = () => (
+            <section className="relative bg-gray-800 bg-opacity-90 p-8 rounded-xl shadow-lg mb-8 text-center animate-fade-in text-gray-100 z-10">
+              <h2 className="text-4xl md:text-5xl font-bold text-yellow-400 mb-6">
+                ¡Bienvenido a Mi Sitio Académico!
+              </h2>
+              <p className="text-lg text-gray-300 leading-relaxed max-w-2xl mx-auto mb-6">
+                Sumérgete en mi expedición científica y mi pasión por el conocimiento. Desde la lógica fundamental de las matemáticas olímpicas donde he alcanzado la cumbre mundial, hasta la vanguardia de la informática, la ciberseguridad y la Inteligencia Artificial, mi trayectoria es una búsqueda constante de principios y soluciones.
+
+Aquí comparto mis logros académicos como un testimonio de mi compromiso con el entendimiento profundo y la aplicación innovadora de la ciencia. Mi visión de futuro se centra en seguir desentrañando los desafíos más complejos, contribuyendo al avance científico y tecnológico a través del aprendizaje continuo y la experimentación. ¡Bienvenido a mi laboratorio de ideas y descubrimientos!
+              </p>
+              <img
+                src="https://prensaelguayanes.com.ve/wp-content/uploads/2024/08/IMG-20240823-WA0212-2048x1536.jpg" // Nueva URL de imagen principal
+                alt="Imagen principal de bienvenida"
+                className="rounded-lg shadow-md mx-auto max-w-full h-auto mb-6"
+              />
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={() => changeViewWithAnimation('olimpiadas')}
+                  className="bg-yellow-700 hover:bg-yellow-800 text-gray-900 font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+                >
+                  <Globe className="w-5 h-5" />
+                  <span>Olimpiadas</span>
+                </button>
+              </div>
+            </section>
+          );
+
+          // Componente para mostrar un curso o certificación (usado en "Sobre Mí")
+          const CourseCard = ({ title, platform, description, date, icon }) => (
+            <div className="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-md border border-gray-700 transform hover:scale-102 transition-transform duration-300 flex items-start space-x-4">
+              <div className="flex-shrink-0 mt-1">{icon}</div>
+              <div>
+                <h3 className="font-semibold text-xl text-yellow-300 mb-2">{title}</h3>
+                <p className="text-yellow-500 font-medium mb-1">{platform}</p>
+                <p className="text-gray-300 text-sm mb-3">{description}</p>
+                <p className="text-gray-400 text-xs">{date}</p>
+              </div>
+            </div>
+          );
+
+          // Datos de las Olimpiadas (internacionales y próximas)
+          const olimpiadasInternacionalesData = [
+            { name: "Olimpiadas Internacionales de Matemáticas Matific (Primaria)", status: "Medalla de Rubí", date: "2022", location: "Argentina", details: "", icon: <Award className="w-6 h-6 text-yellow-500" /> },
+            { name: "Olimpiadas Internacionales de Matemáticas CepreintMath (Secundaria)", status: "Medalla de Oro", date: "2022", location: "Perú", details: "", icon: <Trophy className="w-6 h-6 text-yellow-500" /> },
+            { name: "Olimpiadas Internacionales de Matemáticas Binomio (Primaria)", status: "Mención Honorífica", date: "2022", location: "México", details: "", icon: <Award className="w-6 h-6 text-gray-400" /> },
+            { name: "Olimpiadas Internacionales ITO de Trigonometría", status: "Participación", date: "2022", location: "Indonesia", details: "", icon: <Globe className="w-6 h-6 text-yellow-500" /> },
+            { name: "Olimpiadas Internacionales de Matemáticas Matific (Primaria)", status: "Medalla de Rubí", date: "2023", location: "Argentina", details: "", icon: <Award className="w-6 h-6 text-yellow-500" /> },
+            { name: "Olimpiadas Internacionales de Matemáticas ICMO", status: "Medalla de Bronce", date: "2023", location: "Indonesia", details: "", icon: <Trophy className="w-6 h-6 text-amber-700" /> },
+            { name: "Olimpiadas Internacionales de Matemáticas KARMA", status: "Mención Honorífica", date: "2023", location: "México", details: "", icon: <Award className="w-6 h-6 text-gray-400" /> },
+            { name: "Olimpiadas Internacionales de Ciencias y Matemáticas", status: "Medalla de Bronce", date: "2023", location: "México", details: "", icon: <Trophy className="w-6 h-6 text-amber-700" /> },
+            { name: "Olimpiadas Internacionales Universitarias de Cálculo ICO", status: "Medalla de Bronce", date: "2023", location: "Indonesia", details: "", icon: <Trophy className="w-6 h-6 text-amber-700" /> },
+            { name: "Olimpiadas Copérnico (Online)", status: "Medalla de Bronce", date: "2023", location: "USA, New York", details: "", icon: <Trophy className="w-6 h-6 text-amber-700" /> },
+            { name: "Olimpiadas Internacionales de Geometría IGO", status: "Medalla de Bronce", date: "2023", location: "Sin ubicación específica", details: "", icon: <Trophy className="w-6 h-6 text-amber-700" /> },
+            { name: "Olimpiadas por Equipo de Matemáticas COMATEQ", status: "2° Lugar", date: "2024", location: "Puerto Rico", details: "", icon: <Award className="w-6 h-6 text-gray-400" /> },
+            { name: "Olimpiadas Internacionales de Matemáticas de Euler EMO", status: "Medalla de Bronce", date: "2024", location: "Sin ubicación específica", details: "", icon: <Trophy className="w-6 h-6 text-amber-700" /> },
+            { name: "Olimpiadas De Jóvenes Matemáticos (LIMO)", status: "Medalla de Oro", date: "junio 2024", location: "Sin ubicación específica", details: "¡Campeón mundial de matemáticas en esta competencia!", icon: <Trophy className="w-6 h-6 text-yellow-500" /> },
+            { name: "Olimpiadas Internacionales de Matemáticas Copernicus", status: "Medalla de Plata", date: "2025", location: "Sin ubicación específica", details: "", icon: <Trophy className="w-6 h-6 text-gray-400" /> },
+            { name: "Olimpiadas de Matemáticas por Equipos COMATEQ 2025", status: "3° Lugar", date: "1 de marzo", location: "Puerto Ordaz", details: "Mi participación reciente, logrando el 3er lugar en esta competencia por equipos.", icon: <Award className="w-6 h-6 text-gray-400" /> },
+            { name: "Olimpiada Juvenil de Matemáticas 2023 (ACMVEN)", status: "Medalla de Bronce", date: "2023", location: "Puerto Ordaz, Estado Bolívar", details: "Obtenida en la competencia organizada por ACMVEN.", icon: <Trophy className="w-6 h-6 text-amber-700" /> },
+            // Nueva entrada para Olimpiadas Mobius
+            { name: "Olimpiadas Internacionales de Matemáticas Mobius", status: "Mención Honorífica", date: "Abril 2025", location: "Caracas, Venezuela (MINCYT)", details: "Participación en las olimpiadas en el Ministerio de Tecnología (MINCYT).", icon: <Award className="w-6 h-6 text-gray-400" /> }
+          ];
+
+          const proximasOlimpiadasData = [
+            {
+              name: "Olimpiadas Internacionales de Ciberseguridad",
+              status: "Próximo Evento",
+              date: "21 al 29 de junio",
+              location: "Singapur",
+              details: "Preparación intensiva para esta importante competencia internacional de ciberseguridad. ¡Tu apoyo es crucial para este viaje!",
+              icon: <Shield className="w-6 h-6 text-yellow-500" />
+            }
+          ];
+
+          // Contenido de la sección de Olimpiadas
+          const OlimpiadasContent = () => (
+            <section className="relative bg-gray-800 bg-opacity-90 p-8 rounded-xl shadow-lg mb-8 animate-fade-in text-gray-100 z-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6 text-center">Mi Trayectoria en Olimpiadas Matemáticas</h2>
+              
+              <h3 className="font-bold text-2xl text-gray-200 mb-4 text-center">Representaciones Internacionales y Nacionales</h3>
+              <div className="space-y-6 mb-8">
+                {olimpiadasInternacionalesData.map((olimpiada, index) => (
+                  <OlympiadEntry
+                    key={`int-${olimpiada.name}-${index}`}
+                    name={olimpiada.name}
+                    status={olimpiada.status}
+                    date={olimpiada.date}
+                    location={olimpiada.location}
+                    details={olimpiada.details}
+                    icon={olimpiada.icon}
+                  />
+                ))}
+              </div>
+
+              <h3 className="font-bold text-2xl text-gray-200 mb-4 text-center">Próximas Competencias Matemáticas</h3>
+              <div className="space-y-6 mb-8">
+                {proximasOlimpiadasData.map((olimpiada, index) => (
+                  <OlympiadEntry
+                    key={`prox-${olimpiada.name}-${index}`}
+                    name={olimpiada.name}
+                    status={olimpiada.status}
+                    date={olimpiada.date}
+                    location={olimpiada.location}
+                    details={olimpiada.details}
+                    icon={olimpiada.icon}
+                  />
+                ))}
+              </div>
+
+              <div className="bg-gray-900 bg-opacity-80 p-6 rounded-lg border border-yellow-700 shadow-inner text-center">
+                <HeartHandshake className="w-10 h-10 text-yellow-500 mx-auto mb-4" />
+                <h3 className="font-bold text-2xl text-yellow-400 mb-3">Apoyo para Olimpiadas</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  La participación en olimpiadas internacionales es una oportunidad invaluable para el crecimiento académico y personal. Los gastos de viaje y alojamiento para eventos como las Olimpiadas Internacionales de Ciberseguridad en Singapur (21 al 29 de junio) son significativos.
+                </p>
+                <p className="text-yellow-300 font-semibold mb-4">
+                  Cualquier contribución, por pequeña que sea, es un gran apoyo para seguir representando y alcanzando nuevas metas. ¡Tu ayuda hace posible mi sueño olímpico!
+                </p>
+                <p className="text-gray-400 text-sm mb-4">
+                  Si deseas apoyar, por favor contáctame para coordinar el método de ayuda económica que mejor se ajuste a tu preferencia. Podríamos hablar de transferencias bancarias, plataformas de donación o cualquier otra forma de colaboración.
+                </p>
+                <a
+                  href="mailto:tu.correo@ejemplo.com?subject=Consulta%20sobre%20Apoyo%20Economico%20para%20Olimpiadas%20de%20Ciberseguridad&body=Hola%2C%20me%20gustaria%20saber%20mas%20sobre%20como%20puedo%20apoyar%20economicamente%20para%20sus%20participaciones%20en%20Olimpiadas%2C%20especialmente%20la%20de%20Ciberseguridad%20en%20Singapur.%0A%0AGracias."
+                  className="bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 inline-flex items-center space-x-2"
+                >
+                  Contactar para Apoyar <HeartHandshake className="w-5 h-5 ml-1" />
+                </a>
+              </div>
+            </section>
+          );
+
+          // Componente para cada entrada de Olimpiada
+          const OlympiadEntry = ({ name, status, date, location, details, icon }) => {
+            if (typeof status !== 'string') {
+              console.error("Tipo de estado inválido para OlympiadEntry:", status);
+              return null;
+            }
+
+            const getStatusTextColor = (currentStatus) => {
+              if (currentStatus.includes('Medalla de Rubí') || currentStatus.includes('Medalla de Oro')) return 'text-yellow-400';
+              if (currentStatus.includes('Medalla de Plata')) return 'text-gray-300';
+              if (currentStatus.includes('Medalla de Bronce')) return 'text-yellow-600';
+              if (currentStatus.includes('Mención Honorífica') || currentStatus.includes('2° Lugar') || currentStatus.includes('3° Lugar')) return 'text-yellow-500';
+              if (currentStatus.includes('Próximo Evento')) return 'text-yellow-300';
+              return 'text-gray-200';
+            };
+
+            return (
+              <div className="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-md border border-gray-700 flex items-start space-x-4">
+                <div className="flex-shrink-0 mt-1">{icon}</div>
+                <div>
+                  <h3 className="font-semibold text-xl text-yellow-300 mb-1">{name}</h3>
+                  <p className={`font-bold text-base mb-2 ${getStatusTextColor(status)}`}>
+                    {status} <span className="text-gray-400 text-sm ml-2">({date} {location ? `- ${location}` : ''})</span>
+                  </p>
+                  {details && <p className="text-gray-300 text-base">{details}</p>}
+                </div>
+              </div>
+            );
+          };
+
+          // Datos de los Reconocimientos
+          const reconocimientosData = [
+            { name: "Mejor Estudiante", organizer: "U.E.N. Morales Márcanos", date: "Sin fecha específica", details: "", icon: <Star className="w-6 h-6 text-yellow-500" /> },
+            { name: "Charla “De joven a joven hablando sobre las matemáticas”", organizer: "Universidad UNEFA", date: "Upata, Estado Bolívar, Municipio Piar", details: "Ponente en un evento enfocado en inspirar a jóvenes a través de las matemáticas.", icon: <GraduationCap className="w-6 h-6 text-yellow-500" /> },
+            { name: "Campeón Latinoamericano de Matemáticas", organizer: "Alcaldía de Guasipati", date: "Sin fecha específica", details: "Galardón obtenido en una competencia de matemáticas a nivel latinoamericano.", icon: <Trophy className="w-6 h-6 text-yellow-500" /> },
+            { name: "Ponencia “De joven a joven hablando sobre las matemáticas”", organizer: "Universidad Nacional Abierta (UNA)", date: "Sin fecha específica", details: "Participación como ponente en un evento similar al de la UNA.", icon: <GraduationCap className="w-6 h-6 text-yellow-500" /> },
+            { name: "Charla “¿Cómo ser un campeón en las matemáticas?” y participación en el V Reto de Matemáticas", organizer: "Colegio Aristóbulo Izturiz", date: "El Palmar, Estado Bolívar", details: "Dando una charla inspiracional y participando en un reto matemático escolar.", icon: <BookText className="w-6 h-6 text-yellow-500" /> },
+            { name: "Condecoración de Segunda Clase", organizer: "Alcaldía del Municipio Roscio, Wilhelm Torrellas", date: "23 de agosto de 2024", details: "Distinción otorgada por el alcalde por mis logros.", icon: <Ribbon className="w-6 h-6 text-yellow-500" /> }
+          ];
+
+          // Componente para cada entrada de Reconocimiento
+          const RecognitionEntry = ({ name, organizer, date, details, icon }) => (
+            <div className="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-md border border-gray-700 transform hover:scale-102 transition-transform duration-300 flex items-start space-x-4">
+              <div className="flex-shrink-0 mt-1">{icon}</div>
+              <div>
+                <h3 className="font-semibold text-xl text-yellow-300 mb-1">{name}</h3>
+                <p className="text-yellow-500 font-medium mb-1">{organizer}</p>
+                {details && <p className="text-gray-300 text-sm mb-3">{details}</p>}
+                {date && <p className="text-gray-400 text-xs">{date}</p>}
+              </div>
+            </div>
+          );
+
+          // Contenido de la sección de Reconocimientos
+          const ReconocimientosContent = () => (
+            <section className="relative bg-gray-800 bg-opacity-90 p-8 rounded-xl shadow-lg mb-8 animate-fade-in text-gray-100 z-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6 text-center">Mis Reconocimientos y Distinciones</h2>
+              <div className="space-y-6">
+                {reconocimientosData.map((rec, index) => (
+                  <RecognitionEntry
+                    key={`rec-${index}`}
+                    name={rec.name}
+                    organizer={rec.organizer}
+                    date={rec.date}
+                    details={rec.details}
+                    icon={rec.icon}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+
+          // Datos de los Cursos (ahora parte de "Sobre Mí")
+          const cursosData = [
+            {
+              title: "Chat Bots (La burbuja del saber)",
+              platform: "La burbuja del saber",
+              description: "Curso especializado en el desarrollo de Chat Bots.",
+              date: "Con certificado",
+              icon: <BookText className="w-6 h-6 text-yellow-500" />
+            },
+            {
+              title: "Locución y Oratoria",
+              platform: "Lic. Andres Monsalve",
+              description: "Formación en técnicas de locución y oratoria para comunicación efectiva."
+              ,
+              date: "Con certificado",
+              icon: <GraduationCap className="w-6 h-6 text-yellow-500" />
+            },
+            {
+              title: "Inteligencia Artificial",
+              platform: "Lic. Alejandro Bacadares",
+              description: "Curso introductorio y avanzado en conceptos de Inteligencia Artificial.",
+              date: "Con certificado",
+              icon: <Lightbulb className="w-6 h-6 text-yellow-500" />
+            },
+            {
+              title: "GeoGebra 2022",
+              platform: "Participación en el curso",
+              description: "Formación en el uso de la herramienta GeoGebra para matemáticas.",
+              date: "2022",
+              icon: <BookText className="w-6 h-6 text-yellow-500" />
+            },
+            {
+              title: "ICMAM Latinoamérica",
+              platform: "Participación en el evento",
+              description: "Certificación de participación en el evento ICMAM Latinoamérica.",
+              date: "2023",
+              icon: <GraduationCap className="w-6 h-6 text-yellow-500" />
+            },
+            {
+              title: "Coloquio Internacional de Historia y Filosofía de la Matemática",
+              platform: "Certificación de asistencia",
+              date: "Sin fecha específica",
+              icon: <BookText className="w-6 h-6 text-yellow-500" />
+            },
+            {
+              title: "ICMAM Análisis de América Latina y PDE",
+              platform: "Certificación de participación",
+              date: "Sin fecha específica",
+              icon: <GraduationCap className="w-6 h-6 text-yellow-500" />
+            },
+            {
+              title: "Curso de Inteligencia Artificial y Chat GPT",
+              platform: "Certificación de participación",
+              date: "Sin fecha específica",
+              icon: <Lightbulb className="w-6 h-6 text-yellow-500" />
+            }
+          ];
+
+          // Contenido de la sección "Sobre Mí" (incluye los cursos)
+          const SobreMiContent = () => (
+            <section className="relative bg-gray-800 bg-opacity-90 p-8 rounded-xl shadow-lg mb-8 animate-fade-in text-gray-100 z-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6 text-center">Sobre Mí</h2>
+              <div className="prose max-w-none text-gray-300 mb-8">
+                <p>
+                  Soy un apasionado y dedicado Competidor Olímpico de Matemáticas, involucrado ininterrumpidamente en estas olimpiadas desde el 5to grado hasta la actualidad. Mi trayectoria está marcada por el compromiso, el estudio constante y la búsqueda de la excelencia en la resolución de problemas.
+                  Actualmente, soy el Campeón Mundial de Matemáticas, un título obtenido en las Olimpiadas Internacionales de Jóvenes Matemáticos en junio de 2024.
+                </p>
+                <p className="mt-4">
+                  También he sido destacado en los medios, como en el artículo de RT Actualidad, por superar mis dificultades iniciales en matemáticas para convertirme en un campeón internacional. Mi historia es un testimonio de cómo la perseverancia y la pasión pueden transformar desafíos en logros extraordinarios.
+                </p>
+              </div>
+
+              <h3 className="text-3xl md:text-3xl font-bold text-yellow-400 mb-6 text-center">Mis Cursos y Certificaciones Realizadas</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {cursosData.map((course, index) => (
+                  <CourseCard
+                    key={`course-${index}`}
+                    title={course.title}
+                    platform={course.platform}
+                    description={course.description}
+                    date={course.date}
+                    icon={course.icon}
+                  />
+                ))}
+              </div>
+
+              <div className="flex flex-col items-center mt-8 space-y-4">
+                <h3 className="font-semibold text-2xl text-yellow-400">Contáctame y Sígueme</h3>
+                <div className="flex flex-wrap justify-center gap-4 mt-4">
+                  <button
+                      onClick={() => handleCopyToClipboard('+584267937340', 'phoneCopyMessage')}
+                      className="flex items-center space-x-2 bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                      <Phone className="w-5 h-5" />
+                      <span>+58 426 79 37 340 (WhatsApp)</span>
+                  </button>
+                  <span id="phoneCopyMessage" className="text-sm text-yellow-300 opacity-0 transition-opacity duration-500"></span>
+
+                  <button
+                      onClick={() => handleCopyToClipboard('axelh6200@gmail.com', 'emailCopyMessage')}
+                      className="flex items-center space-x-2 bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                      <Mail className="w-5 h-5" />
+                      <span>axelh6200@gmail.com</span>
+                  </button>
+                  <span id="emailCopyMessage" className="text-sm text-yellow-300 opacity-0 transition-opacity duration-500"></span>
+
+                  <a href="https://www.instagram.com/axelhernandez3892" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <Instagram className="w-5 h-5" />
+                    <span>axelhernandez3892</span>
+                  </a>
+                  <a href="https://www.tiktok.com/@axel.hernandez906" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-700 text-yellow-400 font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <Link className="w-5 h-5" />
+                    <span>axel.hernandez906 (TikTok)</span>
+                  </a>
+                </div>
+                <p className="text-gray-300 mt-4 text-center text-lg font-semibold">
+                  ¡No olvides seguirme en mis redes para estar al tanto de mis próximas aventuras y logros!
+                </p>
+              </div>
+            </section>
+          );
+
+          // Contenido de la sección de Proyectos Futuros
+          const ProyectosFuturosContent = () => (
+            <section className="relative bg-gray-800 bg-opacity-90 p-8 rounded-xl shadow-lg mb-8 animate-fade-in text-gray-100 z-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6 text-center">Mis Proyectos Futuros</h2>
+              <div className="space-y-6">
+                <div className="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-md border border-gray-700 transform hover:scale-102 transition-transform duration-300">
+                  <h3 className="font-semibold text-xl text-yellow-300 mb-2">Diseño y Construcción de Prótesis Funcional</h3>
+                  <p className="text-gray-300 text-base mb-3">
+                    Desde los 11 años, he tenido el gran proyecto de diseñar y construir una prótesis totalmente funcional. Este proyecto sigue en pie y representa un desafío apasionante en el campo de la mecánica.
+                  </p>
+                  <p className="text-yellow-600 font-medium text-sm">
+                    Estado: Pendiente de realización debido a la falta de acceso a impresión 3D.
+                  </p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Estoy buscando oportunidades y recursos para poder llevar a cabo la fabricación de las piezas y materializar este ambicioso proyecto.
+                  </p>
+                </div>
+              </div>
+            </section>
+          );
+
+          // Componente para la Galería Modal
+          const MediaGalleryModal = ({ mediaItems, currentIndex, onClose, onNavigate }) => {
+              if (!mediaItems || mediaItems.length === 0) return null;
+
+              const currentMedia = mediaItems[currentIndex];
+
+              // Función para extraer el ID de video de YouTube
+              const getYouTubeVideoId = (url) => {
+                  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                  const match = url.match(regExp);
+                  return (match && match[2].length === 11) ? match[2] : null;
+              };
+
+              let mediaContent;
+              if (currentMedia.type === 'image') {
+                  mediaContent = (
+                      <img
+                          src={currentMedia.url}
+                          alt="Galería de Experiencias"
+                          className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-xl"
+                          onError={(e) => e.target.src = 'https://placehold.co/800x450/333333/e0b100?text=Imagen+No+Disponible'}
+                      />
+                  );
+              } else if (currentMedia.type === 'video') {
+                  const videoId = getYouTubeVideoId(currentMedia.url);
+                  const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : currentMedia.url;
+                  
+                  mediaContent = (
+                      <div className="relative w-full h-0 pb-[56.25%] bg-gray-900 rounded-lg overflow-hidden"> {/* 16:9 aspect ratio */}
+                          <iframe
+                              width="100%"
+                              height="100%"
+                              src={embedUrl}
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              title="Video de Experiencia"
+                              className="absolute top-0 left-0 w-full h-full"
+                          ></iframe>
+                      </div>
+                  );
+              }
+
+
+              return (
+                  <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+                      <button
+                          onClick={onClose}
+                          className="absolute top-4 right-4 text-white text-3xl font-bold p-2 rounded-full bg-gray-800 bg-opacity-70 hover:bg-opacity-100 transition-colors z-50"
+                          aria-label="Cerrar galería"
+                      >
+                          ×
+                      </button>
+                      <div className="relative max-w-4xl w-full h-auto max-h-[90vh] flex flex-col items-center justify-center">
+                          {mediaContent}
+
+                          {mediaItems.length > 1 && (
+                              <>
+                                  <button
+                                      onClick={() => onNavigate(-1)}
+                                      className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl p-2 rounded-full bg-gray-800 bg-opacity-70 hover:bg-opacity-100 transition-colors z-50"
+                                      aria-label="Anterior"
+                                  >
+                                      ←
+                                  </button>
+                                  <button
+                                      onClick={() => onNavigate(1)}
+                                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl p-2 rounded-full bg-gray-800 bg-opacity-70 hover:bg-opacity-100 transition-colors z-50"
+                                      aria-label="Siguiente"
+                                  >
+                                      →
+                                  </button>
+                              </>
+                          )}
+                      </div>
+                  </div>
+              );
+          };
+
+          // Componente para las entradas de "Axel en Escuelas"
+          const SchoolVisitEntry = ({ title, school, description, date, mediaItems = [], onOpenModal }) => {
+            return (
+              <div className="bg-gray-900 bg-opacity-80 p-6 rounded-lg shadow-md border border-gray-700 flex flex-col items-center text-center">
+                {/* Gallery/Media preview area */}
+                {mediaItems.length > 0 ? (
+                    <div className="w-full mb-4 grid grid-cols-2 gap-2"> {/* grid-cols-2 para mostrar 2 miniaturas por fila */}
+                        {mediaItems.slice(0, 4).map((item, index) => ( // Muestra hasta 4 miniaturas para un diseño más denso
+                            <div key={index} className="aspect-video w-full rounded-md overflow-hidden cursor-pointer bg-gray-800 flex items-center justify-center group relative"
+                                 onClick={() => onOpenModal(mediaItems, index)}>
+                                {item.type === 'image' ? (
+                                    <img
+                                        src={item.url}
+                                        alt={`Miniatura ${index + 1} de ${school}`}
+                                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-200"
+                                        onError={(e) => e.target.src = 'https://placehold.co/200x112/333333/e0b100?text=Error'}
+                                    />
+                                ) : (
+                                    <>
+                                        {/* Intenta obtener miniatura de YouTube si es un video de YouTube */}
+                                        {item.url.includes('youtube.com') || item.url.includes('youtu.be') ? (
+                                            <img
+                                                src={`https://img.youtube.com/vi/${item.url.split('/').pop().split('?')[0]}/hqdefault.jpg`}
+                                                alt={`Miniatura de video ${index + 1}`}
+                                                className="w-full h-full object-cover absolute inset-0 opacity-70"
+                                                onError={(e) => e.target.src = 'https://placehold.co/200x112/333333/e0b100?text=Video'}
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-800 text-yellow-400">
+                                                <VideoPlay className="w-12 h-12" /> {/* Icono de video si no es YouTube */}
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                            <VideoPlay className="w-8 h-8 text-white" />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        ))}
+                        {mediaItems.length > 4 && ( // Indica más imágenes si hay más de 4 miniaturas mostradas
+                            <div className="col-span-full text-gray-400 text-sm mt-2">
+                                +{mediaItems.length - 4} más... Haz clic para ver todos.
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <GraduationCap className="w-12 h-12 text-yellow-500 mb-4" /> // Icono predeterminado si no hay medios
+                )}
+                
+                <h3 className="font-semibold text-xl text-yellow-300 mb-2">{title}</h3>
+                <p className="text-yellow-500 font-medium mb-1">{school}</p>
+                <p className="text-gray-300 text-sm mb-3">{description}</p>
+                {date && <p className="text-gray-400 text-xs">{date}</p>}
+              </div>
+            );
+          };
+
+          // Contenido de la nueva sección "Axel va a las Escuelas"
+          const AxelVaAEscuelasContent = () => {
+            const [isModalOpen, setIsModal] = useState(false);
+            const [currentModalMedia, setCurrentModalMedia] = useState([]);
+            const [currentModalIndex, setCurrentModalIndex] = useState(0);
+
+            const handleOpenModal = (mediaItems, index) => {
+                setCurrentModalMedia(mediaItems);
+                setCurrentModalIndex(index);
+                setIsModal(true);
+            };
+
+            const handleCloseModal = () => {
+                setIsModal(false);
+                setCurrentModalMedia([]);
+                setCurrentModalIndex(0);
+            };
+
+            const handleNavigateModal = (direction) => {
+                setCurrentModalIndex((prevIndex) => {
+                    const newIndex = prevIndex + direction;
+                    if (newIndex < 0) return currentModalMedia.length - 1;
+                    if (newIndex >= currentModalMedia.length) return 0;
+                    return newIndex;
+                });
+            };
+
+            return (
+              <section className="relative bg-gray-800 bg-opacity-90 p-8 rounded-xl shadow-lg mb-8 animate-fade-in text-gray-100 z-10">
+                <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6 text-center">Axel va a las Escuelas</h2>
+                <p className="text-lg text-gray-300 leading-relaxed max-w-2xl mx-auto mb-6 text-center">
+                  Como campeón olímpico de matemáticas, me apasiona compartir mi conocimiento e inspirar a las nuevas generaciones. He tenido la oportunidad de visitar diversas escuelas para dar charlas motivacionales y talleres sobre la importancia de las matemáticas y el estudio.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {/* Entrada para Unidad Educativa Estatal Raul Leoni */}
+                  <SchoolVisitEntry
+                    title="Innovando la Geometría a través del Ritmo"
+                    school="Unidad Educativa Estatal Raúl Leoni"
+                    description="Impartí una charla didáctica transformadora sobre conceptos básicos de geometría, utilizando un enfoque interactivo con un baile y un canto para ángulos y rectas. La participación y el entusiasmo de los estudiantes fueron excepcionales, propiciando múltiples repeticiones de la dinámica."
+                    mediaItems={[
+                        { type: 'image', url: 'https://i.ibb.co/d4b81sVP/Imagen-de-Whats-App-2025-06-14-a-las-23-49-56-e0f01699.jpg' }
+                        // { type: 'video', url: 'URL_DEL_VIDEO_DE_YOUTUBE_O_OTRA_PLATAFORMA_AQUI' } // Agrega la URL del video aquí cuando la tengas
+                    ]}
+                    date="Fecha de la visita (si la recuerdas)" // Puedes añadir la fecha aquí si la tienes
+                    onOpenModal={handleOpenModal}
+                  />
+
+                  {/* Entrada para Colegio Aristóbulo Izturiz con imágenes reales */}
+                  <SchoolVisitEntry
+                    title="Taller Interactivo de Resolución de Problemas"
+                    school="Colegio Aristóbulo Izturiz"
+                    description="Sesión interactiva sobre estrategias para abordar problemas matemáticos complejos, fomentando el pensamiento crítico y la participación activa de los estudiantes. Se implementaron dinámicas que hicieron el aprendizaje lúdico y memorable, como se evidencia en la energía de los participantes."
+                    mediaItems={[
+                        { type: 'image', url: 'https://i.ibb.co/mrgD7dhD/1707273339577.jpg' },
+                        { type: 'image', url: 'https://i.ibb.co/Cr7VkDd/1707273344715.jpg' },
+                        { type: 'image', url: 'https://i.ibb.co/xSyjPwvH/1707273348108.jpg' },
+                        { type: 'image', url: 'https://i.ibb.co/23Xyp7tc/IMG-2024-02-06-16-31-29-029.jpg' },
+                        { type: 'image', url: 'https://i.ibb.co/HTDhvJZs/IMG-2024-02-06-16-56-57-492.jpg' },
+                    ]}
+                    date="Noviembre 2023" // Ajusta la fecha si es diferente
+                    onOpenModal={handleOpenModal}
+                  />
+
+                  {/* Entrada para Unidad Educativa Nacional J.M. Siso Martínez */}
+                  <SchoolVisitEntry
+                    title="Charla Motivacional e Intercambio Matemático"
+                    school="Unidad Educativa Nacional J.M. Siso Martínez"
+                    description="Una experiencia enriquecedora en la que, a pesar de la asistencia selectiva, los participantes demostraron un profundo interés y compromiso. Se generó un diálogo vibrante sobre diversos temas matemáticos, fomentando la curiosidad y el entendimiento colectivo."
+                    date="Fecha de la visita (si la recuerdas)" // Puedes añadir la fecha aquí
+                    mediaItems={[
+                      { type: 'image', url: 'https://i.ibb.co/qFcm9zR2/IMG-2024-03-12-11-06-44-359.jpg' }
+                    ]}
+                    onOpenModal={handleOpenModal}
+                  />
+
+                  {/* Nueva entrada para Unidad Educativa Santiago Mariño */}
+                  <SchoolVisitEntry
+                    title="Compartiendo Trucos y Estrategias Matemáticas"
+                    school="Unidad Educativa Santiago Mariño"
+                    description="En una visita a la Unidad Educativa Santiago Mariño, tuve la oportunidad de compartir trucos y estrategias innovadoras para abordar las matemáticas, buscando despertar el interés y facilitar la comprensión de los conceptos más desafiantes entre los estudiantes."
+                    date="Fecha de la visita (si la recuerdas)" // Agrega la fecha si la tienes
+                    mediaItems={[
+                      { type: 'image', url: 'https://i.ibb.co/VY865LYj/Imagen-de-Whats-App-2025-06-14-a-las-23-36-48-6e6cab24.jpg' }
+                    ]}
+                    onOpenModal={handleOpenModal}
+                  />
+
+                  {/* Entrada para U.E.N. Morales Márcanos (ubicada estratégicamente para mantener el grid) */}
+                  <SchoolVisitEntry
+                    title="Charla Inspiracional"
+                    school="U.E.N. Morales Márcanos"
+                    description="Compartiendo experiencias sobre mi trayectoria olímpica y el valor de la perseverancia."
+                    date="Octubre 2023"
+                    mediaItems={[
+                      { type: 'image', url: 'https://i.ibb.co/fYTNfd6C/Imagen-de-Whats-App-2025-06-19-a-las-09-08-42-3a2c4778.jpg' },
+                      { type: 'image', url: 'https://i.ibb.co/2YtZ21Hx/Imagen-de-Whats-App-2025-06-19-a-las-09-08-44-9fd98683.jpg' }
+                    ]}
+                    onOpenModal={handleOpenModal}
+                  />
+                </div>
+                <p className="text-gray-300 leading-relaxed max-w-2xl mx-auto text-center">
+                  Si tu escuela o institución está interesada en una visita, charla o taller, no dudes en contactarme. ¡Me encantaría contribuir al desarrollo educativo de los jóvenes!
+                </p>
+
+                {isModalOpen && (
+                    <MediaGalleryModal
+                        mediaItems={currentModalMedia}
+                        currentIndex={currentModalIndex}
+                        onClose={handleCloseModal}
+                        onNavigate={handleNavigateModal}
+                    />
+                )}
+              </section>
+            );
+          };
+
+          // Componente para una tarjeta de noticia
+          const NewsCard = ({ title, source, summary, imageUrl, articleUrl }) => (
+            <a href={articleUrl} target="_blank" rel="noopener noreferrer" className="block bg-gray-900 bg-opacity-80 rounded-lg shadow-md border border-gray-700 overflow-hidden transform hover:scale-102 transition-transform duration-300">
+              <img
+                src={imageUrl}
+                alt={`Imagen de portada para ${title}`}
+                className="w-full h-48 object-cover"
+                onError={(e) => e.target.src = 'https://placehold.co/400x200/333333/e0b100?text=Noticia'}
+              />
+              <div className="p-4">
+                <p className="text-yellow-500 text-sm font-medium mb-1">{source}</p>
+                <h3 className="font-semibold text-xl text-yellow-300 mb-2">{title}</h3>
+                <p className="text-gray-300 text-sm line-clamp-3">{summary}</p> {/* line-clamp-3 para limitar el texto */}
+                <span className="text-yellow-600 font-medium text-sm mt-3 inline-block">Leer más →</span>
+              </div>
+            </a>
+          );
+
+          // Contenido de la nueva sección "Axel en Noticias"
+          const NoticiasContent = () => (
+            <section className="relative bg-gray-800 bg-opacity-90 p-8 rounded-xl shadow-lg mb-8 animate-fade-in text-gray-100 z-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6 text-center">Axel en Noticias</h2>
+              <p className="text-lg text-gray-300 leading-relaxed max-w-2xl mx-auto mb-8 text-center">
+                Aquí encontrarás una recopilación de las noticias y entrevistas en las que he aparecido, destacando mis logros y contribuciones.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* NOTICIA RT ACTUALIDAD */}
+                <NewsCard
+                  title="La historia del niño venezolano que no sabía multiplicar y hoy brilla en las Olimpiadas de Matemáticas"
+                  source="RT Actualidad"
+                  summary="Axel de Jesús Hernández Malavé, de 13 años, superó sus dificultades iniciales en matemáticas durante la pandemia para convertirse en un campeón internacional, acumulando ocho premios y soñando con el MIT y el espacio."
+                  imageUrl="https://mf.b37mrtl.ru/actualidad/public_images/2023.11/article/6568deffe9ff715ea41db1c7.jpg"
+                  articleUrl="https://actualidad.rt.com/actualidad/490443-historia-nino-venezolano-brilla-olimpiadas-matematicas"
+                />
+                
+                {/* NOTICIA PRIMICIA.COM.VE - Olimpiada Iraní */}
+                <NewsCard
+                  title="Upatense Axel Hernández participará en Olimpiada Iraní de Geometría"
+                  source="Primicia.com.ve"
+                  summary="Axel Hernández, matemático de Upata, participará en la X Olimpiada Iraní de Geometría. A pesar de los desafíos del currículo, su pasión lo ha llevado a ganar el título Latinoamericano y una medalla de bronce en las Olimpiadas Internacionales de Cálculo."
+                  imageUrl="https://primicia.com.ve/wp-content/uploads/2023/10/WhatsApp-Image-2023-10-09-at-12.43.44-PM.jpeg"
+                  articleUrl="https://primicia.com.ve/guayana/ciudad/upatense-axel-hernandez-participara-en-olimpiada-irani-de-geometria/"
+                />
+
+                {/* NOTICIA PRIMICIA.COM.VE - Logra el oro */}
+                <NewsCard
+                  title="Axel Hernández logra el oro en Olimpiada Internacional Latinoamericana de Matemática"
+                  source="Primicia.com.ve"
+                  summary="El joven estudiante Axel Hernández, de 12 años, ha logrado la medalla de oro en la Olimpiada Internacional Latinoamericana de Matemática, celebrada de forma virtual, destacando en el país por su talento."
+                  imageUrl="https://primicia.com.ve/wp-content/uploads/2022/12/photo_4938688580939786865_x-730x524.jpg"
+                  articleUrl="https://primicia.com.ve/guayana/regiones/axel-hernandez-logra-el-oro-en-olimpiada-internacional-latinoamericana-de-matematica/"
+                />
+
+                {/* NOTICIA PRENSAELGUAYANES.COM.VE */}
+                <NewsCard
+                  title="Municipio Roscio honra al talento joven Axel de Jesús Hernández"
+                  source="Prensa El Guayanés"
+                  summary="El Roscio Municipio reconoció a Axel de Jesús Hernández por su medalla de oro en las Olimpiadas Mundiales de Matemáticas. Recibió la Orden Juan Germán Roscio, una laptop, internet gratis y una beca del alcalde."
+                  imageUrl="https://prensaelguayan.es/wp-content/uploads/2024/08/IMG-20240823-WA0212-2048x1536.jpg"
+                  articleUrl="https://prensaelguayan.es/2024/08/24/municipio-roscio-honra-al-talento-joven-axel-de-jesus-hernandez-recibe-reconocimiento-por-su-triunfo-en-las-olimpiadas-mundiales-de-matematicas/"
+                />
+
+                {/* NUEVA NOTICIA CORREODELCARONI.COM */}
+                <NewsCard
+                  title="En Upata celebran Día Internacional de la Matemática con una ponencia de Axel Hernández"
+                  source="Correo del Caroní"
+                  summary="En Upata, el Día Internacional de la Matemática fue celebrado con una ponencia de Axel Hernández, destacando su trayectoria y la importancia de las matemáticas. El evento contó con la participación de estudiantes y profesores."
+                  imageUrl="https://correodelcaroni.com/wp-content/uploads/2023/03/Upata_Matematica.jpg.webp"
+                  articleUrl="https://correodelcaroni.com/region/en-upata-celebran-dia-internacional-de-la-matematica-con-una-ponencia-de-axel-hernandez/"
+                />
+
+                {/* NUEVA NOTICIA CIUDADCCS.INFO */}
+                <NewsCard
+                  title="Axel Hernández, el bolivarense que dominó las Olimpiadas de Matemática"
+                  source="CiudadCCS"
+                  summary="Axel Hernández es un estudiante de 13 años del estado Bolívar que ha demostrado ser un prodigio en el mundo de las matemáticas, dominando las Olimpiadas de Matemática y acumulando múltiples reconocimientos nacionales e internacionales."
+                  imageUrl="https://i.ibb.co/J87mFG2/imagen-2025-06-19-083331929.png"
+                  articleUrl="https://www.ciudadccs.info/publicacion/25102-axel-hernandez-el-bolivarense-que-domino-las-olimpiadas-de-matematica"
+                />
+
+                {/* NOTICIA 7: Correo del Caroní - Medalla de Bronce Olimpiada Internacional de Cálculo */}
+                <NewsCard
+                  title="De Upata para el mundo: Axel Hernández consiguió medalla de bronce en la Olimpiada Internacional de Cálculo"
+                  source="Correo del Caroní"
+                  summary="Axel Hernández, de Upata, logró una medalla de bronce en la Olimpiada Internacional de Cálculo (ICO), destacando su talento en matemáticas a nivel mundial."
+                  imageUrl="https://correodelcaroni.com/wp-content/uploads/2023/09/Axel_ganadores.jpeg.webp"
+                  articleUrl="https://correodelcaroni.com/region/de-upata-para-el-mundo-axel-hernandez-consiguio-medalla-de-bronce-en-la-olimpiada-internacional-de-calculo/"
+                />
+
+                {/* NUEVA NOTICIA 8: Primicia - Axel Hernández el niño upatense que va tras el oro */}
+                <NewsCard
+                  title="Axel Hernández, el niño upatense que va tras el oro"
+                  source="Primicia.com.ve"
+                  summary="Axel Hernández es un joven talento de Upata que se prepara para competir por el oro en futuras olimpiadas de matemáticas, representando a su región con dedicación y esfuerzo."
+                  imageUrl="https://i.ibb.co/XkZ2q7tD/imagen-2025-06-19-082021662.png"
+                  articleUrl="https://primicia.com.ve/especiales/axel-hernandez-el-nino-upatense-que-va-tras-el-oro/"
+                />
+
+                {/* NUEVA NOTICIA 9: Primicia - Axel Hernández niño prodigio de Upata */}
+                <NewsCard
+                  title="Axel Hernández, niño prodigio de Upata"
+                  source="Primicia.com.ve"
+                  summary="Axel Hernández, un joven prodigio de Upata, ha demostrado un talento excepcional en matemáticas y se perfila como una de las grandes promesas en el ámbito de las olimpiadas académicas."
+                  imageUrl="https://primicia.com.ve/wp-content/uploads/2022/05/WhatsApp-Image-2022-05-23-at-12.32.42-PM.jpeg"
+                  articleUrl="https://primicia.com.ve/especiales/axel-hernandez-el-nino-upatense-que-va-tras-el-oro/"
+                />
+              </div>
+              <p className="text-gray-400 text-sm mt-8 text-center">
+                ¡Mantente atento para más actualizaciones y enlaces a mis apariciones en medios!
+              </p>
+            </section>
+          );
+
+          // Componente para una tarjeta de imagen en la Galería
+          const GalleryImageCard = ({ imageUrl, title, mediaItems, index, onOpenModal }) => (
+              <div className="bg-gray-700 aspect-video rounded-lg shadow-md flex items-center justify-center text-gray-400 text-lg font-semibold overflow-hidden cursor-pointer group relative"
+                   onClick={() => onOpenModal(mediaItems, index)}>
+                  <img
+                      src={imageUrl}
+                      alt={title}
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-200"
+                      onError={(e) => e.target.src = 'https://placehold.co/400x225/333333/e0b100?text=Imagen+No+Disponible'}
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <Image className="w-10 h-10 text-white" />
+                  </div>
+                  <p className="absolute bottom-2 left-2 text-white text-xs font-medium bg-black bg-opacity-60 px-2 py-1 rounded-md">{title}</p>
+              </div>
+          );
+
+          // Datos para la Galería
+          const galeriaImagesData = [
+              { type: 'image', url: 'https://mincyt.gob.ve/wp-content/uploads/2025/04/photo_2025-04-26_09-41-07-3.jpg', title: 'Olimpiadas Mobius en MINCYT (1)' },
+              { type: 'image', url: 'https://mincyt.gob.ve/wp-content/uploads/2025/04/photo_2025-04-26_10-43-09.jpg', title: 'Olimpiadas Mobius en MINCYT (2)' },
+              { type: 'image', url: 'https://mincyt.gob.ve/wp-content/uploads/2025/04/photo_2025-04-26_12-24-29.jpg', title: 'Olimpiadas Mobius en MINCYT (3)' },
+              // Aquí puedes añadir más imágenes con sus respectivos títulos y URLs (NO se añadieron los placeholders anteriores)
+              { type: 'image', url: 'https://i.ibb.co/mrgD7dhD/1707273339577.jpg', title: 'Colegio Aristóbulo Izturiz (1)' },
+              { type: 'image', url: 'https://i.ibb.co/Cr7VkDd/1707273344715.jpg', title: 'Colegio Aristóbulo Izturiz (2)' },
+              { type: 'image', url: 'https://i.ibb.co/xSyjPwvH/1707273348108.jpg', title: 'Colegio Aristóbulo Izturiz (3)' },
+              { type: 'image', url: 'https://i.ibb.co/23Xyp7tc/IMG-2024-02-06-16-31-29-029.jpg', title: 'Colegio Aristóbulo Izturiz (4)' },
+              { type: 'image', url: 'https://i.ibb.co/HTDhvJZs/IMG-2024-02-06-16-56-57-492.jpg', title: 'Colegio Aristóbulo Izturiz (5)' },
+              { type: 'image', url: 'https://i.ibb.co/d4b81sVP/Imagen-de-Whats-App-2025-06-14-a-las-23-49-56-e0f01699.jpg', title: 'U.E. Raúl Leoni' },
+              { type: 'image', url: 'https://i.ibb.co/qFcm9zR2/IMG-2024-03-12-11-06-44-359.jpg', title: 'U.E. J.M. Siso Martínez' },
+              { type: 'image', url: 'https://i.ibb.co/VY865LYj/Imagen-de-Whats-App-2025-06-14-a-las-23-36-48-6e6cab24.jpg', title: 'U.E. Santiago Mariño' },
+              { type: 'image', url: 'https://i.ibb.co/fYTNfd6C/Imagen-de-Whats-App-2025-06-19-a-las-09-08-42-3a2c4778.jpg', title: 'U.E.N. Morales Márcanos (1)' },
+              { type: 'image', url: 'https://i.ibb.co/2YtZ21Hx/Imagen-de-Whats-App-2025-06-19-a-las-09-08-44-9fd98683.jpg', title: 'U.E.N. Morales Márcanos (2)' }
+          ];
+
+          // Contenido de la nueva sección "Galería"
+          const GaleriaContent = () => {
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [currentModalMedia, setCurrentModalMedia] = useState([]);
+            const [currentModalIndex, setCurrentModalIndex] = useState(0);
+
+            const handleOpenModal = (mediaItems, index) => {
+                setCurrentModalMedia(mediaItems);
+                setCurrentModalIndex(index);
+                setIsModalOpen(true);
+            };
+
+            const handleCloseModal = () => {
+                setIsModalOpen(false);
+                setCurrentModalMedia([]);
+                setCurrentModalIndex(0);
+            };
+
+            const handleNavigateModal = (direction) => {
+                setCurrentModalIndex((prevIndex) => {
+                    const newIndex = prevIndex + direction;
+                    if (newIndex < 0) return currentModalMedia.length - 1;
+                    if (newIndex >= currentModalMedia.length) return 0;
+                    return newIndex;
+                });
+            };
+
+            return (
+              <section className="relative bg-gray-800 bg-opacity-90 p-8 rounded-xl shadow-lg mb-8 animate-fade-in text-gray-100 z-10">
+                <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6 text-center">Mi Galería de Experiencias</h2>
+                <p className="text-lg text-gray-300 leading-relaxed max-w-2xl mx-auto mb-8 text-center">
+                  Aquí podrás ver algunas fotos de mis participaciones en olimpiadas, charlas y otros eventos importantes. ¡Cada imagen cuenta una parte de mi trayectoria!
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {galeriaImagesData.map((item, index) => (
+                      <GalleryImageCard
+                          key={`gal-img-${index}`}
+                          imageUrl={item.url}
+                          title={item.title}
+                          mediaItems={galeriaImagesData}
+                          index={index}
+                          onOpenModal={handleOpenModal}
+                      />
+                  ))}
+                </div>
+                {isModalOpen && (
+                    <MediaGalleryModal
+                        mediaItems={currentModalMedia}
+                        currentIndex={currentModalIndex}
+                        onClose={handleCloseModal}
+                        onNavigate={handleNavigateModal}
+                    />
+                )}
+              </section>
+            );
+          };
+
+          // Componente del pie de página
+          const Footer = () => (
+            <footer className="relative bg-gray-900 text-gray-400 p-6 text-center rounded-t-xl shadow-inner z-10">
+              <div className="container mx-auto">
+                <p className="text-sm mb-2">
+                  © {new Date().getFullYear()} Mi Sitio Personal. Todos los derechos reservados.
+                </p>
+                <p className="text-xs">
+                  Diseñado con ❤️ y React/Tailwind CSS.
+                </p>
+              </div>
+            </footer>
+          );
+
+          // Componente para la superposición de la animación del hacker
+          const HackerAnimationOverlay = ({ isVisible }) => {
+            if (!isVisible) return null; // No muestra nada si no es visible
+
+            return (
+              <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80 transition-opacity duration-300" style={{ backdropFilter: 'blur(5px)' }}>
+                <div
+                  className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-cover bg-center bg-no-repeat rounded-lg hacker-image-animation"
+                  style={{
+                    backgroundImage: `url(image_c64d23.png)`, // URL de la imagen del hacker
+                    aspectRatio: '1 / 1'
+                  }}
+                  role="img"
+                  aria-label="Animación de hacker en PC"
+                >
+                  {/* Este div solo muestra la imagen de fondo */}
+                </div>
+              </div>
+            );
+          };
+
+          // Nuevo componente para el modal del video de introducción
+          const IntroVideoModal = ({ isVisible, onClose }) => {
+            if (!isVisible) return null;
+
+            // URL de embed para el YouTube Short
+            // Se quitó scale-[1.1] para que no haga zoom y se ajuste al contenedor.
+            const youtubeEmbedUrl = "https://www.youtube.com/embed/YkW2y2w8GjQ?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=YkW2y2w8GjQ&mute=1";
+
+            return (
+              <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center modal-animate-in">
+                {/* Contenedor del video para que ocupe toda la pantalla */}
+                <div className="absolute inset-0 overflow-hidden">
+                    <iframe
+                        className="w-full h-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full" // Se eliminó scale-[1.1] aquí
+                        src={youtubeEmbedUrl}
+                        frameBorder="0"
+                        // `allow` para permitir autoplay, pantalla completa, etc.
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title="Video de Introducción - Axel Hernández"
+                    ></iframe>
+                </div>
+                {/* Botón Omitir Video posicionado en la parte inferior sobre el video */}
+                <button
+                    onClick={onClose}
+                    className="absolute bottom-8 bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 z-10"
+                >
+                    Omitir Video
+                </button>
+              </div>
+            );
+          };
+
+
+          // Decide qué contenido mostrar según la sección actual
+          const renderContent = () => {
+            switch (currentView) {
+              case 'inicio': return <InicioContent />;
+              case 'olimpiadas': return <OlimpiadasContent />;
+              case 'reconocimientos': return <ReconocimientosContent />;
+              case 'sobreMi': return <SobreMiContent />;
+              case 'proyectosFuturos': return <ProyectosFuturosContent />;
+              case 'axelEnEscuelas': return <AxelVaAEscuelasContent />;
+              case 'galeria': return <GaleriaContent />; {/* Añadido el caso para la Galería */}
+              case 'noticias': return <NoticiasContent />; {/* Nuevo caso para Noticias */}
+              default: return <InicioContent />; // Por defecto, muestra Inicio
+            }
+          };
+
+          // Estructura principal de la aplicación
+          return (
+            <div className="min-h-screen bg-gray-950 flex flex-col font-inter relative">
+              {/* Modal de video de introducción que aparece al inicio */}
+              <IntroVideoModal isVisible={showIntroVideoModal} onClose={() => setShowIntroVideoModal(false)} />
+
+              <MathAnimatedBackground /> {/* Fondo animado */}
+              <Navbar /> {/* Barra de navegación */}
+              <main className="container mx-auto px-4 py-8 flex-grow">
+                {renderContent()} {/* Contenido de la sección actual */}
+              </main>
+              <Footer /> {/* Pie de página */}
+              <HackerAnimationOverlay isVisible={showHackerAnimation} /> {/* Superposición de animación */}
+            </div>
+          );
+        }
+
+        // Renderiza la aplicación en el div con id "root"
+        window.onload = function() {
+            ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        };
+    </script>
+</body>
+</html>
